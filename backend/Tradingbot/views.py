@@ -331,7 +331,7 @@ class Getsymbols(GenericAPIView):
                 },  
                 status=status.HTTP_400_BAD_REQUEST)
 
-
+import json
 class placeorder (GenericAPIView):
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
@@ -342,8 +342,20 @@ class placeorder (GenericAPIView):
             users = request.user
             # dash=utility(users)
             oderids= request.GET.get('selectedRows')
-            oderids= eval(oderids)
             print(type(oderids),oderids)
+            data = json.loads(oderids)
+            print(data[0]['id'])
+            for i in data:
+                data1= dict()
+                data1['user']=users.id
+                data1['cancel_order']=True
+                data1['accountnumber']= i['accountnumber']
+                data1['orderid']= i['orderid']
+                holding = md.ordercancel.objects.create(**data1)
+                data1={}
+
+                 
+
             # dash.cancel_order(oderids)
 
             
@@ -356,7 +368,7 @@ class placeorder (GenericAPIView):
         except Exception as e:
             print(e)
             return Response({
-                    "message": [],
+                    "message": e,
                     "code": status.HTTP_400_BAD_REQUEST
                 },  
                 status=status.HTTP_400_BAD_REQUEST)
@@ -370,58 +382,62 @@ class placeorder (GenericAPIView):
         user = request.user
         try:
             print("Incoming Data:", request.data)
+            if not request.data.get("modify"):
 
-            for i in request.data.get("accountname"):
+                for i in request.data.get("accountname"):
+                    
+                    
+                    data = {
+                        "user": user.id,
+                        "broker": request.data.get("brokerName4"),
+                        "exchange": request.data.get("exchange"),
+                        "instrument": request.data.get("instrument"),
+                        "tradingsymbol": request.data.get("selectsymbol"),
+                        "ltp": request.data.get("price"),
+                        "symboltoken": request.data.get("token"),
+                        "quantity": request.data.get("quantity"),
+                        "ordertype": request.data.get("orderType"),
+                        "product_type": request.data.get("product"),
+                        "transactiontype": request.data.get("side"),
+                        "accountnumber": i,  # store as JSON string if it's a list
+                        "discloseqty": request.data.get("discloseqty"),
+                        "lotsize": request.data.get("lotsize"),
+                        "orderstatus": "PENDING",
+                    }
+
                 
-                
-                data = {
-                    "user": user.id,
-                    "broker": request.data.get("brokerName4"),
-                    "exchange": request.data.get("exchange"),
-                    "instrument": request.data.get("instrument"),
-                    "tradingsymbol": request.data.get("selectsymbol"),
-                    "ltp": request.data.get("price"),
-                    "symboltoken": request.data.get("token"),
-                    "quantity": request.data.get("quantity"),
-                    "ordertype": request.data.get("orderType"),
-                    "product_type": request.data.get("product"),
-                    "transactiontype": request.data.get("side"),
-                    "accountnumber": i,  # store as JSON string if it's a list
-                    "discloseqty": request.data.get("discloseqty"),
-                    "lotsize": request.data.get("lotsize"),
-                    "orderstatus": "PENDING",
-                }
+                    allowed_fields = [f.name for f in md.orderobject._meta.get_fields()]
+                    filtered_data = {k: v for k, v in data.items() if k in allowed_fields}
+
+                    order = md.orderobject.objects.create(**filtered_data)
+
 
             
-                allowed_fields = [f.name for f in md.orderobject._meta.get_fields()]
-                filtered_data = {k: v for k, v in data.items() if k in allowed_fields}
+            elif request.data.get("modify") and request.data.get("orderid"):
+                request.data['user']= user.id
+                request.data['modify_order']= True
+                request.data['ordertype']= request.data.get('orderType')
+                request.data['avg_price']= request.data.get('price')
+                request.data['symboltoken']= request.data.get('token')
+                request.data['symboltoken']= request.data.get('token')
+                request.data['accountnumber']= request.data.get('accountname')
 
-                order = md.orderobject.objects.create(**filtered_data)
+                
 
 
-            
-            if request.data.get("modify") and request.data.get("orderid"):
-                existing = md.orderobject.objects.filter(id=request.data.get("orderid")).last()
-                if existing:
-                    for key, value in data.items():
-                        setattr(existing, key, value)
-                    existing.save()
-                    order = existing
 
-            # ✅ Return success
+
+
+
+                serdata = ser.ordermodify(data=request.data)
+                if serdata.is_valid(raise_exception=True):
+                        serdata.save()
+
+
             return Response(
                 {
                     "message": "Order saved successfully",
-                    "order_id": order.id,
-                    "order_data": {
-                        "tradingsymbol": order.tradingsymbol,
-                        "quantity": order.quantity,
-                        "ltp": order.ltp,
-                        "ordertype": order.ordertype,
-                        "product_type": order.product_type,
-                        "transactiontype": order.transactiontype,
-                        "broker": order.broker,
-                    },
+                   
                 },
                 status=status.HTTP_200_OK,
             )
@@ -592,7 +608,7 @@ class postionsobj(GenericAPIView):
             # dash.orderstatus()
 
             if  request.GET.get('type')== "all":
-                data = list(md.orderstatus.objects.filter(user=users.id,updated_at__range=(end,start)).values('id','nickname','tradingsymbol','transactiontype','quantity','filledqty','avg_price','orderstatus','remarks','ltp',
+                data = list(md.orderstatus.objects.filter(user=users.id,updated_at__range=(end,start)).values('id','accountnumber','nickname','tradingsymbol','symboltoken','transactiontype','quantity','filledqty','avg_price','orderstatus','remarks','ltp',
                                                                       'ordertype','exchange','orderid','updated_at','broker','side','instrument',))
                 
                 
@@ -1094,45 +1110,54 @@ class publicorderdata(GenericAPIView):
                 }, status=status.HTTP_401_UNAUTHORIZED)
             data = request.data.get('data')
             print(data)
-  
-            for i in data:
+            if data:
 
-                order_data = {
-                'user': broker.user,
-                'broker': broker.brokername,
-                'accountnumber': broker.accountnumber,
-                'nickname': broker.nickname,
-                'tradingsymbol': i.get('symbol'),
-                'exchange': i.get('exchange'),
-                'instrument': i.get('instrument'),
-                'symboltoken': i.get('conid'),
-                'ordertype': i.get('ordertype'),
-                'transactiontype': i.get('transactiontype'),
-                'product_type': i.get('product_type'),
-                'quantity': i.get('size'),
-                'ltp': i.get('price'),
-                'avg_price': i.get('price'),
-                'orderid': i.get('execution_id'),
-                'orderstatus': i.get('orderstatus', 'PENDING'),
-                'filledqty': i.get('filledqty', 0),
-                'side':'BUY'if  i.get('side')=='B'else 'SELL',
-                'remarks': i.get('remarks', ''),
-                'discloseqty': i.get('discloseqty'),
-                'lotsize': i.get('lotsize'),}
-            
-                md.orderstatus.objects.filter(accountnumber=i.get('acctId')).delete()
-                position = md.orderstatus.objects.create(**order_data)
-                logger.info(f"Position created via public API - Account: {accountnumber}, Symbol: {order_data.get('tradingsymbol')}")
+                md.orderstatus.objects.filter(accountnumber=broker.accountnumber).delete()
+                for i in data:
 
+                    order_data = {
+                    'user': broker.user,
+                    'broker': broker.brokername,
+                    'accountnumber': broker.accountnumber,
+                        'nickname': broker.nickname,
+                        'tradingsymbol': i.get('symbol',''),
+                        'exchange': i.get('listingExchange',''),
+                        'instrument': i.get('secType',''),
+                        'symboltoken': i.get('conid'),
+                        'ordertype': i.get('origOrderType'),
+                        'transactiontype': i.get('side'),
+                        'product_type': i.get('product_type'),
+                        'quantity': i.get('remainingQuantity'),
+                        'ltp': i.get('price'),
+                        'avg_price': i.get('avgPrice'),
+                        'orderid': i.get('orderId'),
+                        'orderstatus': i.get('status', 'PENDING'),
+                        'filledqty': i.get('filledQuantity', 0),
+                        'side':i.get('side'),
+                        'remarks': i.get('remarks', ''),
+                        'lotsize': i.get('lotsize',''),}
+                    
+                    position = md.orderstatus.objects.create(**order_data)
+                    logger.info(f"Position created via public API - Account: {accountnumber}, Symbol: {order_data.get('tradingsymbol')}")
+                
                 return Response({
-                        "message": "Position created successfully",
-                        "position_id": position.id
-                    }, status=status.HTTP_201_CREATED)
+                                "message": "Position created successfully",
+                                "position_id": position.id
+                            }, status=status.HTTP_201_CREATED)
+            else:
+                orderd= md.orderstatus.objects.filter(accountnumber=broker.accountnumber)
+                if orderd:
+                    orderd.delete()
+                return Response({
+                                "message": "Position not posted since it is blank",
+                            }, status=status.HTTP_201_CREATED)
+
 
 
                 
             
         except Exception as e:
+            print(e)
             logger.error(f"Error in PublicOrderDataAPI: {e}")
             logger.error(traceback.format_exc())
             return Response({
@@ -1164,6 +1189,7 @@ class publicpositiondata(GenericAPIView):
             
             data = request.data.get('data')
             print(data)
+            md.Allpositions.objects.filter(accountnumber=broker.accountnumber).delete()
             for i in data:
             # Extract position data
                 position_data = {
@@ -1182,12 +1208,10 @@ class publicpositiondata(GenericAPIView):
                     'unrealised': i.get('unrealizedPnl', 0),
                 }
 
-                md.Allpositions.objects.filter(accountnumber=i.get('acctId')).delete()
                 position = md.Allpositions.objects.create(**position_data)
 
                 logger.info(f"Position created via public API - Account: {accountnumber}, Symbol: {position_data.get('tradingsymbol')}")
-
-                return Response({
+            return Response({
                         "message": "Position created successfully",
                         "position_id": position.id
                     }, status=status.HTTP_201_CREATED)
@@ -1399,9 +1423,9 @@ class publicgetfunds(GenericAPIView):
 
             
             incoming = request.data
-            print("Incomingssss fundssssss", incoming)
-
-            funds_value = incoming.get(incoming['data']['accountcode']['amount'], "0.00")
+            print("Incomingssss fundssssss", incoming['data'].keys())
+            print(incoming['data']['lookaheadexcessliquidity']['amount'])
+            funds_value = incoming['data']['lookaheadexcessliquidity']['amount']
 
             broker.funds = funds_value
             broker.save()
@@ -1481,8 +1505,8 @@ class orderrequest(GenericAPIView):
             
             # dash.orderstatus()
 
-            data = list(md.orderobject.objects.filter(user=users.id,updated_at__range=(end,start)).values('id','nickname','tradingsymbol','transactiontype','quantity','filledqty','avg_price','orderstatus','remarks','ltp',
-                                                                      'ordertype','exchange','orderid','updated_at','broker','side','instrument',))
+            data = list(md.orderobject.objects.filter(user=users.id,updated_at__range=(end,start)).values('id','nickname','tradingsymbol','transactiontype','quantity','avg_price','remarks','ltp',
+                                                                      'ordertype','exchange','updated_at','broker','side','instrument',))
             print(data)
             
 
@@ -1495,3 +1519,101 @@ class orderrequest(GenericAPIView):
                     "code": status.HTTP_400_BAD_REQUEST
                 },  
                 status=status.HTTP_400_BAD_REQUEST)
+
+
+class getpubliccancel(GenericAPIView):
+    permissions_classes = (AllowAny,)
+    
+    def post(self, request):
+        try:
+            # auth_token = request.GET.get('auth_token')
+
+            is_valid, broker, error_msg = verify_account_token(request.data.get('AUTH_KEY'))
+            print(is_valid,broker,error_msg)
+            if not is_valid:
+                logger.warning(f"Unauthorized place order request: {error_msg}")
+                return Response({
+                    "message": error_msg,
+                    "code": status.HTTP_401_UNAUTHORIZED
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            
+            orders_qs = md.ordercancel.objects.filter(
+                accountnumber=broker.accountnumber,
+                cancel_order = True).last()
+            if orders_qs:
+                order = ser.ordercancel(instance=orders_qs)
+                order= order.data
+                
+                orders_qs.cancel_order= False
+                orders_qs.save()
+            else:
+                orders_qs=[]
+                order=[]
+            
+            
+            
+   
+            
+            return Response({
+                "message": "cancel order data retrieved successfully",
+                "accountnumber": broker.accountnumber,
+                "orders": order
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(e)
+            logger.error(f"Error in getpubliccancel: {e}")
+            logger.error(traceback.format_exc())
+            return Response({
+                "message": str(e),
+                "code": status.HTTP_400_BAD_REQUEST
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+class getpublicmodify(GenericAPIView):
+    permissions_classes = (AllowAny,)
+    
+    def post(self, request):
+        try:
+            # auth_token = request.GET.get('auth_token')
+
+            is_valid, broker, error_msg = verify_account_token(request.data.get('AUTH_KEY'))
+            print(is_valid,broker,error_msg)
+            if not is_valid:
+                logger.warning(f"Unauthorized place order request: {error_msg}")
+                return Response({
+                    "message": error_msg,
+                    "code": status.HTTP_401_UNAUTHORIZED
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            
+            orders_qs = md.ordermodify.objects.filter(
+                accountnumber=broker.accountnumber,
+                modify_order = True).last()
+            if orders_qs:
+                order = ser.ordermodify(instance=orders_qs)
+                order= order.data
+                
+                orders_qs.modify_order= False
+                orders_qs.save()
+            else:
+                orders_qs=[]
+                order=[]
+            
+            
+            
+   
+            
+            return Response({
+                "message": "Modify order data retrieved successfully",
+                "accountnumber": broker.accountnumber,
+                "orders": order
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            print(e)
+            logger.error(f"Error in getpubliccancel: {e}")
+            logger.error(traceback.format_exc())
+            return Response({
+                "message": str(e),
+                "code": status.HTTP_400_BAD_REQUEST
+            }, status=status.HTTP_400_BAD_REQUEST)
+

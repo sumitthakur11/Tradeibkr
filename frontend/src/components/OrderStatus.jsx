@@ -64,7 +64,7 @@ const OrderStatus = () => {
     const[filtereddata,setfiltereddata]= useState([])
     const[selectedorder,setselectedorder]= useState([])
     const[openfil,setopenfil]= useState('')
-
+    const [canceldata,setcanceldata]= useState([])
     
 
 
@@ -121,9 +121,12 @@ const paginationModel = { page: 0, pageSize: 10 };
 
 const handleOrderselect=(value)=>{
 
-console.log(value,'valuesss')
+console.log(value.ids,'valuesss')
 setselectedorder(value.ids)
-
+const idsArray = Array.from(value.ids); // Convert Set to Array
+const updatedData = filtereddata.filter((row) => idsArray.includes(row.orderid));
+console.log(updatedData)
+setcanceldata(updatedData)
 
 
 
@@ -132,7 +135,9 @@ setselectedorder(value.ids)
 
 
 const handlecancelorder = ()=>{
-        const obj= JSON.stringify([...selectedorder])
+    
+        const obj= JSON.stringify(canceldata)
+        
         const payload ="selectedRows="+obj
         const type = "GET"
         const endpoint= "placeorder"
@@ -266,7 +271,7 @@ const handleModify = (row) => {
   <DataGrid
     className='text-black overflow-x-scroll scrollbar-hide'
     rows={filtereddata} // Use filtereddata as rows
-    getRowId={(row) => row.id} // Ensure this matches the unique identifier
+    getRowId={(row) => row.orderid} // Ensure this matches the unique identifier
     disableSelectionOnClick
     
     columns={[...Object.keys(filtereddata[0] || {}).map((key) => ({

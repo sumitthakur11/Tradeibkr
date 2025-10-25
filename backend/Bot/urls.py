@@ -48,6 +48,10 @@ urlpatterns = [
     path('api/v1/ibkr/getfund', views.publicgetfunds.as_view(), name="getforlogs"),
     path ('api/v1/ibkr/downloadlog', views.DownloadLogsAPI.as_view(), name="downloadlog"),
     path ('api/orderrequest', views.orderrequest.as_view(), name="downloadlog"),
+    path ('api/v1/ibkr/cancelreq', views.getpubliccancel.as_view(), name="getpubliccancel"),
+    path ('api/v1/ibkr/modifyreq', views.getpublicmodify.as_view(), name="modifyreq"),
+
+
 
 
 

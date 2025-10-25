@@ -62,3 +62,14 @@ class LogSerializer(serializers.ModelSerializer):
     class Meta:
         model = md.LogEntry
         fields = '__all__'
+class ordercancel(serializers.ModelSerializer):
+    class Meta:
+        model = md.ordercancel
+
+        fields = "__all__"
+
+class ordermodify(serializers.ModelSerializer):
+    class Meta:
+        model = md.ordermodify
+
+        fields = "__all__"

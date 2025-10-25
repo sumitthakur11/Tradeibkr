@@ -95,6 +95,7 @@ class orderobject(models.Model):
 
 
 
+
 class globalsymbol(models.Model):
     
     user= models.IntegerField(null=False,blank=False,default=None)
@@ -249,3 +250,37 @@ class orderstatus(models.Model):
     filledqty= models.CharField(null=True,blank=True,default='',max_length=100)
     active = models.BooleanField(null=True,blank=True,default=True)
     filename= models.CharField(null=True,blank=True,default='',max_length=100)
+    cancel_order=  models.BooleanField(null=True,blank=True,default=False)
+
+class ordercancel(models.Model):
+    user= models.IntegerField(null=False,blank=False,default=None)
+    updated_at = models.DateTimeField(auto_now=True)
+    orderid=models.CharField(null=True,blank=True,default=None,max_length=200)
+    cancel_order=  models.BooleanField(null=True,blank=True,default=False)
+    accountnumber= models.CharField(null=True,blank=True,default=None,max_length=100)
+
+
+
+class ordermodify (models.Model):
+    user= models.IntegerField(null=False,blank=False,default=None)
+    updated_at = models.DateTimeField(auto_now=True)
+    orderid=models.CharField(null=True,blank=True,default=None,max_length=200)
+    modify_order=  models.BooleanField(null=True,blank=True,default=False)
+    tradingsymbol= models.TextField(null=True,blank=True,default='')
+    symboltoken=models.TextField(null=True,blank=True,default='')
+    ordertype=models.TextField(null=True,blank=True,default=None)
+    transactiontype=models.TextField(null=True,blank=True,default=None)
+    product_type=models.TextField(null=True,blank=True,default=None)
+    avg_price=models.FloatField(null=True,blank=True,default=None)
+    quantity=models.TextField(null=True,blank=True,default=None)    
+    exchange=models.TextField(null=True,blank=True,default=None)
+    broker= models.CharField(null=True,blank=True,default=None,max_length=100,choices=brokerlist)
+    accountnumber= models.CharField(null=True,blank=True,default=None,max_length=100)
+    nickname= models.CharField(null=True,blank=True,default='',max_length=100)
+    side=models.TextField(null=True,blank=True,default=None)
+    ltp=models.FloatField(null=True,blank=True,default=None)
+    instrument= models.CharField(null=True,blank=True,default='',max_length=100)
+    discloseqty= models.CharField(null=True,blank=True,default='',max_length=100)
+    lastmodifiedtime= models.CharField(null=True,blank=True,default='',max_length=100)
+    remarks= models.CharField(null=True,blank=True,default='',max_length=10000)
+
