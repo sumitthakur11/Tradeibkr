@@ -322,13 +322,20 @@ const handlelogin = async (brokerid) => {
                     className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600"
                   >
                     
+                    
+                      <td className={row.status?" text-green-600  ":"text-red-600 "}> 
+                  {row.status?"Connected":"Disconnected"}
+
+                  </td>
                         {Object.entries(row)
-      .filter(([key]) => key !== 'valid' && key !== 'active')
+      .filter(([key]) => key !== 'status' && key !== 'active')
       .map(([key, value], idx) => (
         <td key={idx} className="px-6 py-4">
           {value}
         </td>
+
       ))}
+
                     <td className="px-6 py-4 text-center">
                       <Button
                         className={`bg-blue-600 text-white py-2 text-sm rounded-md hover:bg-blue-700 ${row.active ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'}`}

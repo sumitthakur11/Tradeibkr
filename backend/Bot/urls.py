@@ -50,6 +50,8 @@ urlpatterns = [
     path ('api/orderrequest', views.orderrequest.as_view(), name="downloadlog"),
     path ('api/v1/ibkr/cancelreq', views.getpubliccancel.as_view(), name="getpubliccancel"),
     path ('api/v1/ibkr/modifyreq', views.getpublicmodify.as_view(), name="modifyreq"),
+    path ('api/v1/ibkr/connection', views.getpubliconnection.as_view(), name="connections"),
+
 
 
 

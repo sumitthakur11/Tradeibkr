@@ -145,5 +145,6 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     },
-}
+}   
 
+APPEND_SLASH = False

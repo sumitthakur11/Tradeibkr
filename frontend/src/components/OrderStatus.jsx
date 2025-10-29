@@ -274,22 +274,10 @@ const handleModify = (row) => {
     getRowId={(row) => row.orderid} // Ensure this matches the unique identifier
     disableSelectionOnClick
     
-    columns={[...Object.keys(filtereddata[0] || {}).map((key) => ({
-      field: key,
-      headerName: key.charAt(0).toUpperCase() + key.slice(1),
-      // flex: 1, // Adjust column width
-      width:150
-    })),
-  
-
-    
-    
-    {
-  
-  
+    columns={[
+      {
       field: 'Modify',
       headerName: 'Modify',
-      // flex: 1, // Adjust column width
       width:150,
       renderCell: (params) =>(
     
@@ -297,7 +285,15 @@ const handleModify = (row) => {
           Modify
         </Button>
       )
-    } 
+    } ,
+      ...Object.keys(filtereddata[0] || {}).map((key) => (
+      {
+      field: key,
+      headerName: key.charAt(0).toUpperCase() + key.slice(1),
+      // flex: 1, // Adjust column width
+      width:150
+    })),
+    
     
     
     

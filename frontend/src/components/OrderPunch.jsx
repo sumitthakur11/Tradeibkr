@@ -58,7 +58,7 @@ const OrderPunch = () => {
   
   const [product, setProduct] = useState("");
   const [brokerName, setBrokerName] = useState("");
-  const [orderType, setOrderType] = useState("");
+  const [orderType, setOrderType] = useState("LIMIT");
   const [Loginopen, setLoginOpen] = useState(false);
   const [brokerName2, setBrokerName2] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -78,6 +78,8 @@ const OrderPunch = () => {
   const [isAccountDisabled, setIsAccountDisabled] = useState(false);
   const [modify, setmodify] = useState(false);
   const [orderid, setorderid] = useState('');
+  const [Rth, setRth] = useState(false);
+
 
 
   
@@ -112,6 +114,7 @@ const OrderPunch = () => {
       setBrokerName4(passedState.data.broker||"")
       setPrice(passedState.data.ltp||"")
       setAccountname(passedState.data.accountnumber || "");  
+
 
 
 
@@ -155,6 +158,11 @@ const OrderPunch = () => {
 
    
     const handlePlaceOrder = ()=>{
+
+         if (!accountname || accountname.length === 0) {
+          alert('No account selected')
+  return 
+}
          const payload = JSON.stringify({
           brokerName4,
           selectsymbol,
@@ -170,7 +178,8 @@ const OrderPunch = () => {
           instrument,
           modify,
           orderid,
-          lotsize
+          lotsize,
+          Rth
 
 
         });
@@ -291,10 +300,10 @@ const OrderPunch = () => {
     setPrice("");
     setQuantity("");
     setProduct("");
-    setOrderType("");
     setExchange("")
     setInstrument("")
     setdiscolseqty("")
+    setRth(false)
 
   }
 
@@ -444,6 +453,7 @@ const OrderPunch = () => {
             animation={0.5}
             maxCount={3}
             variant="default"
+            
           />
         </div>
      
@@ -456,10 +466,11 @@ const OrderPunch = () => {
 
               <div className="flex flex-col gap-2 w-full items-center ">
                   <Label className="text-lg text-slate-800 text-center">Exchange</Label>
-                <div className="flex flex-wrap max-xs:flex-col gap-6 w-full">
-                  <div className="flex gap-6 flex-wrap">
+                <div className="flex flex-wrap max-xs:flex-col gap-6 w-full justify-center">
+                  <div className="flex gap-6 flex-wrap  ">
                     <div className=" flex max-xs:flex-col gap-4 ">
-                  <Label className="flex items-center gap-2">
+                      
+                  <Label className="flex items-center gap-2 ">
                     <input
                       type="radio"
                       name="exchange"
@@ -515,89 +526,16 @@ const OrderPunch = () => {
             </div>
 
             <div className="flex gap-6 w-full items-center justify-evenly">
-                <div>
+                
+<div>
                <div className={`flex flex-col gap-2 w-full items-center ${!isIndexEnabled && !isindexEQ ? "text-gray-400 hidden" : "text-slate-800 flex"}`}>
   
   
-  <Label className="text-slate-800 text-center">Type</Label>
+  
   <div className="flex gap-4 flex-wrap">
     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
-    {/* <Label className="flex items-center gap-2">
-      <input
-        type="radio"
-        name="type"
-        value="FUTSTK"
-        checked={instrument === "FUTSTK"}
-        
-        onChange={(e) => alertsymbol(e.target.value)}
-        disabled={!isIndexEnabled} // Disable when `isIndexEnabled` is false
-        className="w-4 h-4"
-      />
-      <span className={`text-lg ${!isIndexEnabled ? "text-gray-400" : "text-slate-800"}`}>
-        FUTSTK
-      </span>
-    </Label> */}
-    <Label className="flex items-center gap-2">
-      <input
-        type="radio"
-        name="type"
-        value="FUT"
-        checked={instrument === "FUT"}
-
-        onChange={(e) => alertsymbol(e.target.value)}
-        disabled={!isIndexEnabled}
-        className="w-4 h-4"
-      />
-      <span className={`text-lg ${!isIndexEnabled ? "text-gray-400" : "text-slate-800"}`}>
-        FUT
-      </span>
-    </Label>
    
-    <Label className="flex items-center gap-2">
-      <input
-        type="radio"
-        name="type"
-        value="OPT"
-        checked={instrument === "OPT"}
-
-        onChange={(e) => alertsymbol(e.target.value)}
-        disabled={!isIndexEnabled}
-        className="w-4 h-4"
-      />
-      <span className={`text-lg ${!isIndexEnabled ? "text-gray-400 hidden" : "text-slate-800 flex"}`}>
-        OPT
-      </span>
-    </Label>
-    {/* <Label className="flex items-center gap-2">
-      <input
-        type="radio"
-        name="type"
-        value="OPTSTK"
-        checked={instrument === "OPTSTK"}
-
-        onChange={(e) => alertsymbol(e.target.value)}
-        disabled={!isIndexEnabled}
-        className={"w-4 h-4"}
-      />
-      <span className={`text-lg ${!isIndexEnabled ? "text-gray-400" : "text-slate-800"}`}>
-        OPTSTK
-      </span>
-    </Label> */}
-     <Label className="flex items-center gap-2">
-      <input
-        type="radio"
-        name="type"
-        checked={instrument === "EQ"}
-
-        value="EQ"
-        onChange={(e) => alertsymbol(e.target.value)}
-        disabled={!isindexEQ}
-        className={"w-4 h-4"}
-      />
-      <span className={`text-lg ${!isindexEQ ? "text-gray-400" : "text-slate-800"}`}>
-        EQ
-      </span>
-    </Label>
+    
    
     </div>
     
@@ -606,7 +544,6 @@ const OrderPunch = () => {
 </div>
   
   </div>
-
 <div className="flex flex-col gap-2">
   <Label>Buy/Sell</Label>
   <div className="flex gap-6 max-xs:flex-col">
@@ -784,6 +721,66 @@ const OrderPunch = () => {
 
             <div className="flex gap-2 w-full ">
               <div className="flex flex-col gap-2 w-full ">
+                <div>
+               <div className="flex flex-col gap-2 w-full items-center text-slate-800 flex">
+  
+  
+  <Label className="text-slate-800 ">TIF</Label>
+  <div className="flex gap-4 flex-wrap items-center">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
+   
+    <Label className="flex items-center gap-2">
+      <input
+        type="radio"
+        name="type"
+        value="GTC"
+        checked={instrument === "GTC"}
+
+        onChange={(e) => alertsymbol(e.target.value)}
+        className="w-4 h-4"
+      />
+      <span className={`text-lg ${!isIndexEnabled ? "text-gray-400" : "text-slate-800"}`}>
+        GTC 
+      </span>
+    </Label>
+   
+    <Label className="flex items-center gap-2">
+      <input
+        type="radio"
+        name="type"
+        value="DAY"
+        checked={instrument === "DAY"}
+
+        onChange={(e) => alertsymbol(e.target.value)}
+        className="w-4 h-4"
+      />
+      <span className={`text-lg ${!isIndexEnabled ? "text-gray-400 hidden" : "text-slate-800 flex"}`}>
+        DAY
+      </span>
+    </Label>
+   
+     <Label className="flex items-center gap-2">
+      <input
+        type="radio"
+        name="type"
+        checked={instrument === "IOC"}
+
+        value="IOC"
+        onChange={(e) => alertsymbol(e.target.value)}
+        className={"w-4 h-4"}
+      />
+      <span className={`text-lg  text-slate-800`}>
+        IOC
+      </span>
+    </Label>
+   
+    </div>
+    
+  </div>
+  
+</div>
+  
+  </div>
               {/* Product */}
                 {/* <Label className="text-lg text-slate-800">Product</Label>
                 <div className="flex gap-6 flex-wrap ">
@@ -841,13 +838,13 @@ const OrderPunch = () => {
                   <Label className="flex items-center gap-2">
                     <input
                       type="radio"
-                      name="orderType"
-                      value="MARKET"
-                      checked={orderType === "MARKET"}
-                      onChange={(e) => {setOrderType(e.target.value),setPrice(0)}}
+                      name="RTH"
+                      value={!Rth}
+                      checked={Rth === true}
+                      onChange={(e) => setRth(!Rth)}
                       className="w-4 h-4"
                     />
-                    <span className="text-lg text-slate-800">Market</span>
+                    <span className="text-lg text-slate-800">OUTSIDE RTH</span>
                   </Label>
                 </div>
               </div>

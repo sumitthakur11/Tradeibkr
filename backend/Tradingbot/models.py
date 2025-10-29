@@ -49,6 +49,8 @@ class Broker(models.Model):
     refresh_token= models.CharField(null=True,blank=True,default=None,max_length=5000)
     access_token= models.CharField(null=True,blank=True,default=None,max_length=5000)
     filename= models.CharField(null=True,blank=True,default='',max_length=100)
+    status= models.BooleanField(blank=True,null=True,default=False)
+    
 
 
 
@@ -88,6 +90,10 @@ class orderobject(models.Model):
     remarks= models.CharField(null=True,blank=True,default='',max_length=10000)
     filledqty= models.CharField(null=True,blank=True,default='',max_length=100)
     active = models.BooleanField(null=True,blank=True,default=True)
+    OUTSIDERTH = models.BooleanField(null=True,blank=True,default=False)
+    TIF= models.CharField(null=True,blank=True,default='',max_length=100)
+
+
 
 
 
