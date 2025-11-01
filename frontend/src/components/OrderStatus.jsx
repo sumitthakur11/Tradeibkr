@@ -154,22 +154,23 @@ const handlecancelorder = ()=>{
 
 
 }
-  const handleSelectIndex = (value) => {
-      if (value) {
+const handleSelectIndex = (value) => {
+  if (!value) return;
 
-    const fill = tableDatafetch.filter((item) =>
-    item.orderstatus.toLowerCase().includes(value.toLowerCase())
+  let value1;
+  if (value === 'Open') {
+    value1 = ['submitted', 'presubmitted'];
+  } else {
+    value1 = [value.toLowerCase()];
+  }
+
+  const fill = tableDatafetch.filter((item) =>
+    value1.some((status) => item.orderstatus.toLowerCase().includes(status))
   );
-      console.log(fill,value.toLowerCase())
 
-      setfiltereddata(fill)
+  setfiltereddata(fill);
+};
 
-     
-
-
-    }
-
-    };
     const handleDelete = () => {
   // Ensure selectedRows is an array
   
@@ -234,10 +235,10 @@ const handleModify = (row) => {
               </SelectTrigger>
               <SelectContent className="bg-white border border-blue-300">
                 <SelectItem
-                  value="Complete"
+                  value="filled"
                   className="hover:bg-blue-100 hover:text-blue-800 focus:bg-blue-200"
                 >
-                  Completed
+                  Filled
                 </SelectItem>
                 <SelectItem
                   value="Rejected"
@@ -252,7 +253,7 @@ const handleModify = (row) => {
                   Open
                 </SelectItem>
                 <SelectItem
-                  value="Cancelled"
+                  value="cancelled"
                   className="hover:bg-blue-100 hover:text-blue-800 focus:bg-blue-200"
                 >
                   Cancelled

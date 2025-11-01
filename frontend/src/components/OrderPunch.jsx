@@ -62,7 +62,7 @@ const OrderPunch = () => {
   const [Loginopen, setLoginOpen] = useState(false);
   const [brokerName2, setBrokerName2] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [discloseqty, setdiscolseqty] = useState("");
+  const [discloseqty, setdiscolseqty] = useState(0);
   const [isIndexEnabled, setIsIndexEnabled] = useState(true);
   const [tableDatafetch, setTableDatafetch] = useState([]);
 
@@ -279,7 +279,7 @@ const OrderPunch = () => {
           }
         };
   
-          console.log(instrument,'instrument')
+          console.log(Rth,'instrument')
             const alertsymbol = (value) => {
 
             setInstrument(value);
@@ -544,35 +544,6 @@ const OrderPunch = () => {
 </div>
   
   </div>
-<div className="flex flex-col gap-2">
-  <Label>Buy/Sell</Label>
-  <div className="flex gap-6 max-xs:flex-col">
-                <Label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="side"
-                    value="BUY"
-                    checked={side === "BUY"}
-                    onChange={(e) => setside(e.target.value)}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-lg text-green-600">Buy</span>
-                </Label>
-                <Label className="flex items-center gap-2">
-                  <input
-                    type="radio"
-                    name="side"
-                    value="SELL"
-                    checked={side === "SELL"}
-                    onChange={(e) => setside(e.target.value)}
-                    className="w-4 h-4"
-                  />
-                  <span className="text-lg text-red-600">Sell</span>
-                </Label>
-              </div>
-              </div>
-
-
               </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
               <div className="space-y-2">
@@ -609,38 +580,7 @@ const OrderPunch = () => {
 
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label className="text-base sm:text-lg text-slate-800">Disclose Quantity</Label>
-                <div className="flex items-center gap-2">
-                  <Button
-                    onClick={() =>
-                      setdiscolseqty((prev) => Math.max(0, Number(prev) - 1))
-                    } // Convert to number before decrementing
-                    className="bg-red-500 text-white px-3 py-2 rounded-md hover:bg-red-600 flex-shrink-0"
-                  >
-                    -
-                  </Button>
-                  {/* Quantity Input */}
-                  <Input
-                    type="number"
-                    value={discloseqty}
-                    onChange={(e) => setdiscolseqty(Number(e.target.value))} // Ensure the value is a number
-                    placeholder="Enter quantity"
-                    className="w-full min-w-24 p-2 border border-gray-300 rounded-md text-center bg-slate-300/65 shadow-md"
-                  />
-                  {/* Increment Button */}
-                  <Button
-                    onClick={() => setdiscolseqty((prev) => Number(prev) + 1)} // Convert to number before incrementing
-                    className="bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-600 flex-shrink-0"
-                  >
-                    +
-                  </Button>
-
-                  
-
-                </div>
-                  <p className="text-xs text-gray-600">{"Lot size: " + lotsize}</p>
-              </div>
+             
                 
               <div className="flex flex-col space-y-3">
                 <Label className="text-slate-800 text-base">Symbol</Label>
@@ -715,7 +655,34 @@ const OrderPunch = () => {
                   className="w-full p-2 border border-gray-300 rounded-md bg-slate-300/65 shadow-md"
                 />
               </div>
-              
+              <div className="flex flex-col gap-2 space-y-2"><Label>Buy/Sell</Label>
+              <div className="flex gap-6 max-xs:flex-col">
+                <Label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="side"
+                    value="BUY"
+                    checked={side === "BUY"}
+                    onChange={(e) => setside(e.target.value)}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-lg text-green-600">Buy</span>
+                </Label>
+                <Label className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="side"
+                    value="SELL"
+                    checked={side === "SELL"}
+                    onChange={(e) => setside(e.target.value)}
+                    className="w-4 h-4"
+                  />
+                  <span className="text-lg text-red-600">Sell</span>
+                </Label>
+              </div>
+              </div>
+
+
 
             </div>
 
@@ -723,7 +690,7 @@ const OrderPunch = () => {
               <div className="flex flex-col gap-2 w-full ">
                 <div>
                <div className="flex flex-col gap-2 w-full items-center text-slate-800 flex">
-  
+                
   
   <Label className="text-slate-800 ">TIF</Label>
   <div className="flex gap-4 flex-wrap items-center">
@@ -837,11 +804,12 @@ const OrderPunch = () => {
                   </Label>
                   <Label className="flex items-center gap-2">
                     <input
-                      type="radio"
+                      type="checkbox"
                       name="RTH"
                       value={!Rth}
                       checked={Rth === true}
-                      onChange={(e) => setRth(!Rth)}
+                      
+                      onChange={() => setRth(!Rth)}
                       className="w-4 h-4"
                     />
                     <span className="text-lg text-slate-800">OUTSIDE RTH</span>

@@ -242,7 +242,7 @@ class orderstatus(models.Model):
     sellorderid=models.CharField(null=True,blank=True,default='',max_length=200)
     side=models.TextField(null=True,blank=True,default=None)
     orderstatus= models.TextField(null=True,blank=True,default='')
-    ltp=models.FloatField(null=True,blank=True,default=None)
+    price=models.FloatField(null=True,blank=True,default=None)
     lotsize= models.CharField(null=True,blank=True,default=None,max_length=200)
     sellorderstatus= models.CharField(null=True,blank=True,default='',max_length=20,choices=statuslist)
     buyorderstatus= models.CharField(null=True,blank=True,default='',max_length=20,choices=statuslist)

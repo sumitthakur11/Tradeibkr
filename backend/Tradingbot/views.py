@@ -611,8 +611,9 @@ class postionsobj(GenericAPIView):
             # dash.orderstatus()
 
             if  request.GET.get('type')== "all":
-                data = list(md.orderstatus.objects.filter(user=users.id,updated_at__range=(end,start)).values('id','accountnumber','nickname','tradingsymbol','symboltoken','transactiontype','quantity','filledqty','avg_price','orderstatus','remarks','ltp',
-                                                                      'ordertype','exchange','orderid','updated_at','broker','side','instrument',))
+                data = list(md.orderstatus.objects.filter(user=users.id,updated_at__range=(end,start)) .order_by('-lastmodifiedtime').values('id','accountnumber','tradingsymbol','symboltoken','transactiontype','orderstatus','remarks','quantity','filledqty','avg_price','price',
+                                                                      'exchange','side','orderid','lastmodifiedtime'))
+
                 
                 
 
@@ -1122,7 +1123,7 @@ class publicorderdata(GenericAPIView):
                     'broker': broker.brokername,
                     'accountnumber': broker.accountnumber,
                         'nickname': broker.nickname,
-                        'tradingsymbol': i.get('symbol',''),
+                        'tradingsymbol': i.get('ticker',''),
                         'exchange': i.get('listingExchange',''),
                         'instrument': i.get('secType',''),
                         'symboltoken': i.get('conid'),
@@ -1130,14 +1131,18 @@ class publicorderdata(GenericAPIView):
                         'transactiontype': i.get('side'),
                         'product_type': i.get('product_type'),
                         'quantity': i.get('remainingQuantity'),
-                        'ltp': i.get('price'),
+                        'price': i.get('price') if i.get('price') !='' else 0,
                         'avg_price': i.get('avgPrice'),
                         'orderid': i.get('orderId'),
                         'orderstatus': i.get('status', 'PENDING'),
                         'filledqty': i.get('filledQuantity', 0),
                         'side':i.get('side'),
                         'remarks': i.get('remarks', ''),
-                        'lotsize': i.get('lotsize',''),}
+                        'lotsize': i.get('lotsize',''),
+                        'lastmodifiedtime':datetime.datetime.strptime(i.get('lastExecutionTime', ''), '%y%m%d%H%M%S')
+
+                        
+                        ,}
                     
                     position = md.orderstatus.objects.create(**order_data)
                     logger.info(f"order status updated via public API - Account: {broker.accountnumber}")
@@ -1540,9 +1545,8 @@ class orderrequest(GenericAPIView):
             
             # dash.orderstatus()
 
-            data = list(md.orderobject.objects.filter(user=users.id,updated_at__range=(end,start)).values('id','orderid','accountnumber','tradingsymbol','transactiontype','quantity','avg_price','remarks','orderstatus',
-                                                                      'ordertype','exchange','updated_at','instrument','OUTSIDERTH','TIF'))
-            print(data)
+            data = list(md.orderobject.objects.filter(user=users.id,updated_at__range=(end,start))  .order_by('-updated_at').values('id','accountnumber','transactiontype','tradingsymbol','orderstatus','remarks','quantity','avg_price',
+                                                                      'ordertype','exchange','instrument','OUTSIDERTH','TIF','orderid','updated_at'))
             
 
             return Response({"message":data})
