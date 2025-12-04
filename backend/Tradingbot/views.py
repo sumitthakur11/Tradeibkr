@@ -256,7 +256,7 @@ def get_symbol_info(symbol, exchange, ETF='N'):
 
             symbolinfolist= pd.read_csv(io.StringIO(symbolinfolist),delimiter='|')
             print(symbolinfolist.head())
-            print(symbolinfolist.columns)
+            print(symbolinfolist.columns)   
             if exchange in ['N','A','V','M']:
                 symbolinfolist= symbolinfolist.rename(columns={'ACT Symbol':'Symbol','Security Name':'Name','Exchange':'Exchange','ETF':'ETF','Lot Size':'LotSize','Test Issue':'TestIssue','NASDAQ Symbol':'NASDAQSymbol'})
             else:
@@ -281,15 +281,12 @@ def get_symbol_info(symbol, exchange, ETF='N'):
             print(symbolinfolist['Symbol'].unique(),'symbbolinfo')
             print(symbol,'symbollllllllllllllllllllllllllllllllllllllllll')
             symbbolinfo= symbbolinfo[symbbolinfo['Symbol'].str.contains(symbol, case=False, na=False)]
-            print(symbbolinfo,'symbollllllllllllllllllllllllllllllllllllllllll')
             if symbbolinfo.empty:
 
                 symbbolinfo= symbbolinfo[symbbolinfo['NASDAQSymbol'].str.contains(symbol, case=False, na=False)]
-                print(symbbolinfo,'symbollllllllllllllllllllllllllllllllllllllllll')
 
             if symbbolinfo.empty:
                 symbbolinfo= symbbolinfo[symbbolinfo['Name'].str.contains(symbol, case=False, na=False)]
-                print(symbbolinfo,'symbollllllllllllllllllllllllllllllllllllllllll')
 
                 
 
@@ -611,8 +608,8 @@ class postionsobj(GenericAPIView):
             # dash.orderstatus()
 
             if  request.GET.get('type')== "all":
-                data = list(md.orderstatus.objects.filter(user=users.id,updated_at__range=(end,start)) .order_by('-lastmodifiedtime').values('id','accountnumber','tradingsymbol','symboltoken','transactiontype','orderstatus','remarks','quantity','filledqty','avg_price','price',
-                                                                      'exchange','side','orderid','lastmodifiedtime'))
+                data = list(md.orderstatus.objects.filter(user=users.id,updated_at__range=(end,start)) .order_by('-lastmodifiedtime').values('accountnumber','tradingsymbol','transactiontype','orderstatus','quantity','filledqty','price','remarks','avg_price',
+                                                                      'exchange','side','orderid','lastmodifiedtime','id','symboltoken'))
 
                 
                 
@@ -706,7 +703,7 @@ class loadaccount(GenericAPIView):
             if broker_lc == 'all':
                 datas = brokerlist
             else:
-                datas = md.Broker.objects.filter(user=users.id,brokername='IBKR').values('status','brokerid','funds','nickname','accountnumber','access_token','active')
+                datas = md.Broker.objects.filter(user=users.id,brokername='IBKR').values('status','brokerid','funds','nickname','accountnumber','access_token','updated_at','active')
            
             # datas is always defined (possibly empty) at this point
             return Response({"message": datas})
@@ -877,7 +874,7 @@ class getposition(GenericAPIView):
             # dash=utility(user)
 
             # oid=dash.getposition()
-            datalist = md.Allpositions.objects.filter(user=user.id).values('nickname','tradingsymbol','netqty','buyavgprice','sellavgprice','ltp','broker','realised','unrealised')
+            datalist = md.Allpositions.objects.filter(user=user.id).values('nickname','tradingsymbol','netqty','buyavgprice','sellavgprice','ltp','broker','realised','unrealised','updated_at')
             
 
             return Response({"message":datalist})
@@ -896,7 +893,6 @@ class getposition(GenericAPIView):
         try:
             user = request.user
             data = request.data
-            print("Incomingssss positionsssssss", data)
             data['user'] = user.id 
             
             position = md.Allpositions.objects.create(**data)
@@ -1324,7 +1320,10 @@ class getpublicplaceorder(GenericAPIView):
             
             orders_qs = md.orderobject.objects.filter(
                 user=broker.user,
-                active = True).last()
+                accountnumber=broker.accountnumber,
+                active = True
+                ).last()
+            
             if orders_qs:
                 order = ser.orderobject(instance=orders_qs)
                 order= order.data
@@ -1539,7 +1538,7 @@ class orderrequest(GenericAPIView):
             users = request.user
             data = dict()
             start= datetime.datetime.now(tz= pytz.timezone('Asia/Kolkata')).replace(hour=23, minute=59, second=0, microsecond=0)
-            end = start- datetime.timedelta(days=3)
+            end = start- datetime.timedelta(days=1)
             print(end,start)
             # dash=utility(users)
             
@@ -1627,6 +1626,7 @@ class getpublicmodify(GenericAPIView):
             orders_qs = md.ordermodify.objects.filter(
                 accountnumber=broker.accountnumber,
                 modify_order = True).last()
+            print(orders_qs,'orders_qs')
             if orders_qs:
                 order = ser.ordermodify(instance=orders_qs)
                 order= order.data

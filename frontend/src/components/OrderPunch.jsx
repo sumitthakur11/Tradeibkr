@@ -67,8 +67,10 @@ const OrderPunch = () => {
   const [tableDatafetch, setTableDatafetch] = useState([]);
 
   const [brokerName4, setBrokerName4] = useState( "");
-  const [exchange, setExchange] = useState('');
-  const [instrument, setInstrument] = useState( "");
+  
+
+  const [exchange, setExchange] = useState("NSDQ");
+  const [instrument, setInstrument] = useState("GTC");
   const [selectsymbol, setselectsymbol] = useState("");
   const[token,settoken]=useState( "");
   const [side, setside] = useState(""); // "Buy" or "Sell"
@@ -78,12 +80,11 @@ const OrderPunch = () => {
   const [isAccountDisabled, setIsAccountDisabled] = useState(false);
   const [modify, setmodify] = useState(false);
   const [orderid, setorderid] = useState('');
-  const [Rth, setRth] = useState(false);
-
+  const [Rth, setRth] = useState(true);
 
 
   
-
+// 
   const [query, setQuery] = useState('');
  const [data,setdata]= useState([])
   const [selected, setSelected] = useState([])
@@ -265,9 +266,14 @@ const OrderPunch = () => {
             const response = await handleexchangerequest("GET", queryParams, "symbols",false);
             if (response) {
               setdata(response)
-              removeDuplicatsymbol = [...new Set(response.Symbol)];
-              console.log(removeDuplicatsymbol,'removesymbols')
-              setsymbol(removeDuplicatsymbol);
+              // removeDuplicatsymbol = [...new Set(response.Symbol)];
+              const formatted = response.Symbol.map((_, i) => ({
+                  Symbol: response.Symbol[i],
+                  Name: response.Name[i],
+                  Exchange: response.Exchange[i],
+                 
+                }));
+              setsymbol(formatted);
               console.log("Symbols fetched successfully:", response);
             } else {
               console.error("Failed to fetch symbols");
@@ -615,21 +621,21 @@ const OrderPunch = () => {
                             Symbol.map((symbol, index) => (
                               <CommandItem
                                 key={index}
-                                value={symbol}
+                                value={symbol.Symbol}
                                 onSelect={() => {
-                                  setselectsymbol(symbol);
+                                  setselectsymbol(symbol.Symbol);
                                   setComboOpen(false);
                                   handlesetlotsize(index)
                                 }}
                               >
                                 <Check
                                   className={`mr-2 h-4 w-4 ${
-                                    selectsymbol === symbol
+                                    selectsymbol === symbol.Symbol
                                       ? "opacity-100"
                                       : "opacity-0"
                                   }`}
                                 />
-                                {symbol}
+                                {symbol.Symbol+" - "+symbol.Name}
                               </CommandItem>
                             ))
                           ) : (
@@ -640,7 +646,7 @@ const OrderPunch = () => {
                             </CommandItem>
                           )}
                         </CommandGroup>
-                      </CommandList>
+                      </CommandList>  
                     </Command>
                   </PopoverContent>
                 </Popover>
